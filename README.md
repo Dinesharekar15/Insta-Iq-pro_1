@@ -47,4 +47,4 @@ A complete redesign of [instaiq.in](https://instaiq.in), inspired by [Devtown](h
 - Document your changes
 
 ## License
-[MIT](LICENSE)
+[InstaIQ](LICENSE)
