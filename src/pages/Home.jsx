@@ -1,0 +1,416 @@
+import React from "react";
+import { Link } from "react-router-dom";
+
+// Images (relative to public/assets/)
+const serviceImages = [
+  "assets/images/our-services/pic1.jpg",
+  "assets/images/our-services/pic2.jpg",
+  "assets/images/our-services/pic3.jpg",
+];
+
+// Popular courses data for homepage
+const popularCourses = [
+  {
+    img: "assets/images/courses/course1.jpg",
+    title: "ALL INDIA PLACEMENT APTITUDE TEST",
+    provider: "Insta iQ",
+    price: "Free",
+    oldPrice: null,
+    badge: "FREE",
+    id: 0
+  },
+  {
+    img: "assets/images/courses/course2.jpg",
+    title: "PLACEMENT APTITUDE COURSE",
+    provider: "Insta Education",
+    price: "₹6,999",
+    oldPrice: "₹9,999",
+    badge: "Included in Membership",
+    id: 1
+  },
+  {
+    img: "assets/images/courses/course3.jpg",
+    title: "ADVANCE EXCEL & DATA ANALYSIS",
+    provider: "Insta Education",
+    price: "₹4,500",
+    oldPrice: null,
+    badge: "Included in Membership",
+    id: 2
+  }
+];
+const eventImages = [
+  "assets/images/event/pic4.jpg",
+  "assets/images/event/pic3.jpg",
+  "assets/images/event/pic2.jpg",
+];
+const testimonialImages = [
+  "assets/images/testimonials/pic1.jpg",
+  "assets/images/testimonials/pic2.jpg",
+];
+const newsImages = [
+  "assets/images/blog/latest-blog/pic1.jpg",
+  "assets/images/blog/latest-blog/pic2.jpg",
+  "assets/images/blog/latest-blog/pic3.jpg",
+];
+
+// Move all event data to a shared array for use in both Home and Events pages
+export const allEvents = [
+  {
+    img: "assets/images/event/pic1.jpg",
+    date: "29",
+    month: "October",
+    title: "Education Autumn Tour 2019",
+    time: "7:00am 8:00am",
+    location: "Berlin, Germany",
+    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
+    type: "happening"
+  },
+  {
+    img: "assets/images/event/pic2.jpg",
+    date: "29",
+    month: "October",
+    title: "Education Autumn Tour 2019",
+    time: "7:00am 8:00am",
+    location: "Berlin, Germany",
+    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
+    type: "upcoming"
+  },
+  {
+    img: "assets/images/event/pic3.jpg",
+    date: "29",
+    month: "October",
+    title: "Education Autumn Tour 2019",
+    time: "7:00am 8:00am",
+    location: "Berlin, Germany",
+    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
+    type: "upcoming"
+  },
+  {
+    img: "assets/images/event/pic4.jpg",
+    date: "29",
+    month: "October",
+    title: "Education Autumn Tour 2019",
+    time: "7:00am 8:00am",
+    location: "Berlin, Germany",
+    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
+    type: "happening"
+  },
+  {
+    img: "assets/images/event/pic2.jpg",
+    date: "29",
+    month: "October",
+    title: "Education Autumn Tour 2019",
+    time: "7:00am 8:00am",
+    location: "Berlin, Germany",
+    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
+    type: "expired"
+  },
+  {
+    img: "assets/images/event/pic1.jpg",
+    date: "29",
+    month: "October",
+    title: "Education Autumn Tour 2019",
+    time: "7:00am 8:00am",
+    location: "Berlin, Germany",
+    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
+    type: "happening"
+  }
+];
+// Only show the first 3 events on the homepage
+const upcomingEvents = allEvents.slice(0, 3);
+
+// Home page for INSTA IQ
+const Home = () => {
+  // Button style for all homepage buttons
+  const homeBtnStyle = {
+    borderRadius: 10,
+    minWidth: 120,
+    minHeight: 40,
+    fontWeight: 600,
+    border: 'none',
+    background: '#2563eb',
+    color: '#fff',
+    transition: 'background 0.2s',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+    display: 'inline-block',
+  };
+  const homeBtnHover = {
+    background: '#1e40af',
+    color: '#fff',
+  };
+
+  return (
+    <div className="page-content bg-white">
+      {/* Hero/Main Slider (static for now) */}
+      <section className="rev-slider" style={{ position: "relative", overflow: "hidden" }}>
+        <div style={{ width: "100%", maxHeight: 500, position: "relative" }}>
+          <img
+            src="assets/images/slider/slide1.jpg"
+            alt="Hero"
+            style={{ width: "100%", maxHeight: 500, objectFit: "cover" }}
+          />
+          <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(2,0,11,0.6)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+            zIndex: 2
+          }}>
+            <h2 style={{ fontSize: 50, fontWeight: 700 }}>Welcome To InstaIQ</h2>
+            <h4 style={{ fontSize: 24, margin: "10px 0" }}>Master Placement Aptitude & Excel in Your Career</h4>
+            <p style={{ maxWidth: 600, textAlign: "center" }}>
+              Join thousands of students who have successfully cracked placement tests with our comprehensive aptitude courses, mock tests, and expert guidance.
+            </p>
+            <div style={{ marginTop: 20 }}>
+              <Link to="/courses" className="btn radius-xl" style={{ ...homeBtnStyle, marginRight: 10 }}>BROWSE COURSES</Link>
+              <Link to="/contact" className="btn radius-xl" style={homeBtnStyle}>CONTACT US</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Services */}
+      <section className="section-area content-inner service-info-bx" style={{ marginTop: 40 }}>
+        <div className="container">
+          <div className="row">
+            {[
+              { title: "Mock Tests & Practice", icon: "fa-file-text-o", img: serviceImages[0] },
+              { title: "Aptitude Training", icon: "fa-book", img: serviceImages[1] },
+              { title: "Career Guidance", icon: "fa-users", img: serviceImages[2] },
+            ].map((service, idx) => (
+              <div className="col-lg-4 col-md-4 col-sm-6" key={service.title}>
+                <div className="service-bx">
+                  <div className="action-box">
+                    <img src={service.img} alt={service.title} />
+                  </div>
+                  <div className="info-bx text-center">
+                    <div className="feature-box-sm radius bg-white">
+                      <i className={`fa ${service.icon} text-primary`}></i>
+                    </div>
+                    <h4><a href="#">{service.title}</a></h4>
+                    <a href="#" className="btn radius-xl">View More</a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Courses */}
+      <section className="section-area section-sp2 popular-courses-bx">
+        <div className="container">
+          <div className="row">
+            <div className="col-md-12 heading-bx left">
+              <h2 className="title-head">Popular <span>Courses</span></h2>
+              <p style={{ color: '#fff', fontSize: 18, marginBottom: 24 }}>Master placement aptitude with our most popular courses designed by industry experts</p>
+            </div>
+          </div>
+          <div className="row">
+            {popularCourses.map((course, idx) => (
+              <div className="col-md-4 col-sm-6" key={course.id}>
+                <div className="cours-bx d-flex flex-column h-100" style={{ minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#ffe6b3', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div className="action-box" style={{ position: 'relative' }}>
+                      <img src={course.img} alt={course.title} style={{ width: '100%', borderTopLeftRadius: 12, borderTopRightRadius: 12, height: 150, objectFit: 'cover' }} />
+                      {course.badge && (
+                        <span style={{ 
+                          position: "absolute", 
+                          top: 12, 
+                          left: 12, 
+                          background: course.badge === "FREE" ? "#27ae60" : "#e67e22", 
+                          color: "#fff", 
+                          borderRadius: 6, 
+                          padding: "2px 10px", 
+                          fontSize: 13, 
+                          zIndex: 2
+                        }}>
+                          {course.badge}
+                        </span>
+                      )}
+                    </div>
+                    <div className="info-bx text-center" style={{ padding: 12 }}>
+                      <h5 style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}><Link to={`/course-details/${course.id}`}>{course.title}</Link></h5>
+                      <span style={{ color: '#444', fontSize: 15 }}>{course.provider}</span>
+                    </div>
+                    <div className="price" style={{ margin: '0 auto 8px auto', textAlign: 'center', fontWeight: 700, fontSize: 22, color: '#222' }}>
+                      {course.oldPrice && <del style={{ color: '#888', marginRight: 8, fontSize: 16 }}>{course.oldPrice}</del>}
+                      <span>{course.price}</span>
+                    </div>
+                  </div>
+                  <div className="d-flex flex-column align-items-center" style={{ padding: 12, background: 'transparent' }}>
+                    <Link to={`/course-details/${course.id}`} className="btn" style={{ ...homeBtnStyle, width: '100%', margin: 0, borderRadius: 10, textAlign: 'center' }}>Read More</Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center" style={{ marginTop: 30 }}>
+            <Link to="/courses" className="btn" style={homeBtnStyle}>View All Courses</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Online Courses Search Section */}
+      <section className="section-area section-sp1 ovpr-dark bg-fix online-cours" style={{ backgroundImage: "url(assets/images/background/bg1.png)", backgroundSize: "cover" }}>
+        <div className="container">
+          <div className="row">
+            <div className="col-md-12 text-center text-white">
+              <h2>Master Placement Aptitude</h2>
+              <h5>Join thousands of students who cracked their dream jobs</h5>
+              <form className="cours-search" onSubmit={e => e.preventDefault()}>
+                <div className="input-group">
+                  <input type="text" className="form-control" placeholder="Search for aptitude courses, mock tests..." />
+                  <div className="input-group-append">
+                    <button className="btn" type="submit" style={homeBtnStyle}>Search</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div className="mw800 m-auto">
+            <div className="row">
+              <div className="col-md-4 col-sm-6">
+                <div className="cours-search-bx m-b30">
+                  <div className="icon-box">
+                    <h3><i className="ti-user"></i><span className="counter">10</span>K+</h3>
+                  </div>
+                  <span className="cours-search-text">Students Placed</span>
+                </div>
+              </div>
+              <div className="col-md-4 col-sm-6">
+                <div className="cours-search-bx m-b30">
+                  <div className="icon-box">
+                    <h3><i className="ti-book"></i><span className="counter">9</span></h3>
+                  </div>
+                  <span className="cours-search-text">Specialized Courses</span>
+                </div>
+              </div>
+              <div className="col-md-4 col-sm-12">
+                <div className="cours-search-bx m-b30">
+                  <div className="icon-box">
+                    <h3><i className="ti-layout-list-post"></i><span className="counter">95</span>%</h3>
+                  </div>
+                  <span className="cours-search-text">Success Rate</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Upcoming Events */}
+      <section className="section-area section-sp2">
+        <div className="container">
+          <div className="row">
+            <div className="col-md-12 text-center heading-bx">
+              <h2 className="title-head m-b0">Upcoming <span>Events</span></h2>
+              <p className="m-b0">Upcoming Education Events To Feed Brain. </p>
+            </div>
+          </div>
+          <div className="row">
+            {/* Use the first three events from Events.jsx's eventsData, and match the card design from Events page */}
+            {[
+              {
+                img: "/assets/images/event/1.png",
+                type: "happening",
+                date: "15",
+                month: "July",
+                title: "AI in Career Guidance Workshop",
+                time: "9:00am 10:00am",
+                location: "Nagpur , India",
+                desc: "An AI-driven system that recommends tailored study plans, practice tests, and resources based on user performance, role preferences , and career goals."
+              },
+              {
+                img: "/assets/images/event/2.png",
+                type: "upcoming",
+                date: "21",
+                month: "August",
+                title: "Resume Building Bootcamp ",
+                time: "11:00am 12:00am",
+                location: "Nagpur , India",
+                desc: "An online tool to create professional resumes and is a hands-on workshop where participants learn how to create job-winning resumes tailored for campus  placements,with templates optimized for ATS."
+              },
+              {
+                img: "/assets/images/event/3.png",
+                type: "upcoming",
+                date: "29",
+                month: "August",
+                title: "Aptitude Mastery to Succeed in Competitive Exams",
+                time: "9:00am 10:00am",
+                location: "Nagpur , India",
+                desc: "Specialized training modules focused on quantitative aptitude, logical reasoning, critical thinking and verbal ability to excel in campus placement tests and competitive exams."
+              }
+            ].map((event, idx) => (
+              <div className="col-md-4 col-sm-6" key={event.img}>
+                <div className="event-bx d-flex flex-column h-100" style={{ minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#ffe6b3', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', width: '100%' }}>
+                  <div className="action-box" style={{ position: 'relative' }}>
+                    <img src={event.img} alt={event.title} style={{ width: '100%', height: 150, objectFit: 'cover', borderTopLeftRadius: 12, borderTopRightRadius: 12, display: 'block' }} />
+                  </div>
+                  <div className="info-bx text-center" style={{ padding: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                      <div className="event-time" style={{ background: '#2563eb', color: '#fff', borderRadius: 8, padding: '8px 16px', marginRight: 10, minWidth: 60 }}>
+                        <div className="event-date" style={{ fontSize: 24, fontWeight: 700 }}>{event.date}</div>
+                        <div className="event-month" style={{ fontSize: 14 }}>{event.month}</div>
+                      </div>
+                      <div style={{ textAlign: 'left' }}>
+                        <h5 style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>{event.title}</h5>
+                        <ul className="media-post" style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: 13, color: '#444' }}>
+                          <li style={{ display: 'inline', marginRight: 10 }}><i className="fa fa-clock-o"></i> {event.time}</li>
+                          <li style={{ display: 'inline' }}><i className="fa fa-map-marker"></i> {event.location}</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <p style={{ color: '#444', fontSize: 15, marginTop: 8 }}>{event.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <Link to="/events" className="btn" style={homeBtnStyle}>View All Events</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="section-area section-sp2 bg-fix ovbl-dark" style={{ backgroundImage: "url(assets/images/background/bg1.jpg)", backgroundSize: "cover" }}>
+        <div className="container">
+          <div className="row">
+            <div className="col-md-12 text-white heading-bx left">
+              <h2 className="title-head text-uppercase">what people <span>say</span></h2>
+              <p>It is a long established fact that a reader will be distracted by the readable content of a page</p>
+            </div>
+          </div>
+          <div className="row">
+            {testimonialImages.map((img, idx) => (
+              <div className="col-md-6" key={img}>
+                <div className="testimonial-bx">
+                  <div className="testimonial-thumb">
+                    <img src={img} alt="Testimonial" />
+                  </div>
+                  <div className="testimonial-info">
+                    <h5 className="name">Peter Packer</h5>
+                    <p>-Art Director</p>
+                  </div>
+                  <div className="testimonial-content">
+                    <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type...</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Home; 
