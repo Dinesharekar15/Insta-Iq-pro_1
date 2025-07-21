@@ -1,8 +1,54 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react"; // Import useState and useEffect
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 
 // Header component with template navbar styling
 const Header = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+  const [userName, setUserName] = useState(""); // State to store user's name
+  const navigate = useNavigate(); // Hook for navigation
+
+  // Effect to check login status from localStorage
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      const userInfo = localStorage.getItem('userInfo');
+      if (userInfo) {
+        try {
+          const parsedUserInfo = JSON.parse(userInfo);
+          setIsLoggedIn(true);
+          setUserName(parsedUserInfo.name || parsedUserInfo.email); // Display name or email
+        } catch (e) {
+          console.error("Failed to parse userInfo from localStorage", e);
+          setIsLoggedIn(false);
+          setUserName("");
+          localStorage.removeItem('userInfo'); // Clear invalid data
+        }
+      } else {
+        setIsLoggedIn(false);
+        setUserName("");
+      }
+    };
+
+    // Initial check
+    checkLoginStatus();
+
+    // Listen for changes in localStorage (e.g., from login/logout on other tabs)
+    // This is a simple way; for more robust solutions, consider a context API or Redux.
+    window.addEventListener('storage', checkLoginStatus);
+
+    // Cleanup listener
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+    };
+  }, []); // Empty dependency array means this runs once on mount and cleans up on unmount
+
+  // Handle user logout
+  const handleLogout = () => {
+    localStorage.removeItem('userInfo'); // Remove user info from localStorage
+    setIsLoggedIn(false); // Update state
+    setUserName(""); // Clear user name
+    navigate('/'); // Redirect to home page
+  };
+
   return (
     <header className="header rs-nav header-transparent">
       {/* Top Bar */}
@@ -23,8 +69,17 @@ const Header = () => {
                     <option data-icon="flag flag-us">English US</option>
                   </select>
                 </li>
-                <li><Link to="/login">Login</Link></li>
-                <li><Link to="/register">Register</Link></li>
+                {isLoggedIn ? (
+                  <>
+                    <li><Link to="/profile">Hi, {userName}</Link></li> {/* Link to user profile */}
+                    <li><Link to="/" onClick={handleLogout}>Logout</Link></li> {/* Logout button */}
+                  </>
+                ) : (
+                  <>
+                    <li><Link to="/login">Login</Link></li>
+                    <li><Link to="/register">Register</Link></li>
+                  </>
+                )}
               </ul>
             </div>
           </div>
@@ -45,7 +100,6 @@ const Header = () => {
               <span></span>
             </button>
             {/* Social Icons and Search */}
-            {/* Social Icons removed. Keep search button if needed. */}
             <div className="secondary-menu">
               <div className="secondary-inner">
                 <ul>
@@ -72,7 +126,7 @@ const Header = () => {
                 <li><Link to="/events">Events</Link></li>
                 <li><Link to="/faq">FAQ</Link></li>
                 <li><Link to="/cart">Cart</Link></li>
-                <li><Link to="/login">Login</Link></li>
+                {/* Removed direct Login/Register links here as they are handled in Top Bar */}
               </ul>
             </nav>
           </div>
@@ -82,4 +136,4 @@ const Header = () => {
   );
 };
 
-export default Header; 
+export default Header;

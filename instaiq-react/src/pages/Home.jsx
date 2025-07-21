@@ -1,43 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
-// Images (relative to public/assets/)
+// Define your backend base URL from environment variables using import.meta.env
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+console.log("Backend URL (Home Page):", import.meta.env.VITE_BACKEND_URL);
+
+// Images (relative to public/assets/) - These are static assets, not from backend
 const serviceImages = [
   "assets/images/our-services/pic1.jpg",
   "assets/images/our-services/pic2.jpg",
   "assets/images/our-services/pic3.jpg",
 ];
 
-// Popular courses data for homepage
-const popularCourses = [
-  {
-    img: "assets/images/courses/course1.jpg",
-    title: "ALL INDIA PLACEMENT APTITUDE TEST",
-    provider: "Insta iQ",
-    price: "Free",
-    oldPrice: null,
-    badge: "FREE",
-    id: 0
-  },
-  {
-    img: "assets/images/courses/course2.jpg",
-    title: "PLACEMENT APTITUDE COURSE",
-    provider: "Insta Education",
-    price: "₹6,999",
-    oldPrice: "₹9,999",
-    badge: "Included in Membership",
-    id: 1
-  },
-  {
-    img: "assets/images/courses/course3.jpg",
-    title: "ADVANCE EXCEL & DATA ANALYSIS",
-    provider: "Insta Education",
-    price: "₹4,500",
-    oldPrice: null,
-    badge: "Included in Membership",
-    id: 2
-  }
-];
 const eventImages = [
   "assets/images/event/pic4.jpg",
   "assets/images/event/pic3.jpg",
@@ -53,75 +28,79 @@ const newsImages = [
   "assets/images/blog/latest-blog/pic3.jpg",
 ];
 
-// Move all event data to a shared array for use in both Home and Events pages
 export const allEvents = [
   {
-    img: "assets/images/event/pic1.jpg",
-    date: "29",
-    month: "October",
-    title: "Education Autumn Tour 2019",
-    time: "7:00am 8:00am",
-    location: "Berlin, Germany",
-    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
-    type: "happening"
+    img: "/assets/images/event/1.png",
+    date: "15",
+    month: "July",
+    title: "AI in Career Guidance Workshop",
+    time: "9:00am 10:00am",
+    location: "Nagpur , India",
+    desc: "An AI-driven system that recommends tailored study plans, practice tests, and resources based on user performance, role preferences , and career goals."
   },
   {
-    img: "assets/images/event/pic2.jpg",
-    date: "29",
-    month: "October",
-    title: "Education Autumn Tour 2019",
-    time: "7:00am 8:00am",
-    location: "Berlin, Germany",
-    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
-    type: "upcoming"
+    img: "/assets/images/event/2.png",
+    date: "21",
+    month: "August",
+    title: "Resume Building Bootcamp ",
+    time: "11:00am 12:00am",
+    location: "Nagpur , India",
+    desc: "An online tool to create professional resumes and is a hands-on workshop where participants learn how to create job-winning resumes tailored for campus  placements,with templates optimized for ATS."
   },
   {
-    img: "assets/images/event/pic3.jpg",
+    img: "/assets/images/event/3.png",
     date: "29",
-    month: "October",
-    title: "Education Autumn Tour 2019",
-    time: "7:00am 8:00am",
-    location: "Berlin, Germany",
-    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
-    type: "upcoming"
-  },
-  {
-    img: "assets/images/event/pic4.jpg",
-    date: "29",
-    month: "October",
-    title: "Education Autumn Tour 2019",
-    time: "7:00am 8:00am",
-    location: "Berlin, Germany",
-    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
-    type: "happening"
-  },
-  {
-    img: "assets/images/event/pic2.jpg",
-    date: "29",
-    month: "October",
-    title: "Education Autumn Tour 2019",
-    time: "7:00am 8:00am",
-    location: "Berlin, Germany",
-    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
-    type: "expired"
-  },
-  {
-    img: "assets/images/event/pic1.jpg",
-    date: "29",
-    month: "October",
-    title: "Education Autumn Tour 2019",
-    time: "7:00am 8:00am",
-    location: "Berlin, Germany",
-    desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the..",
-    type: "happening"
+    month: "August",
+    title: "Aptitude Mastery to Succeed in Competitive Exams",
+    time: "9:00am 10:00am",
+    location: "Nagpur , India",
+    desc: "Specialized training modules focused on quantitative aptitude, logical reasoning, critical thinking and verbal ability to excel in campus placement tests and competitive exams."
   }
 ];
-// Only show the first 3 events on the homepage
-const upcomingEvents = allEvents.slice(0, 3);
 
-// Home page for INSTA IQ
 const Home = () => {
-  // Button style for all homepage buttons
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // New state for login status
+
+  // Check login status on component mount
+  useEffect(() => {
+    const userInfo = localStorage.getItem('userInfo');
+    if (userInfo) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []); // Run once on mount
+
+  // Fetch courses from the backend when the component mounts
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${API_BASE_URL}/courses`);
+        const fetchedCourses = response.data.map(course => ({
+          _id: course._id,
+          img: course.imageUrl,
+          title: course.title,
+          provider: "Insta Education",
+          price: `₹${course.price.toFixed(2)}`,
+          oldPrice: null,
+          badge: course.price === 0 ? "FREE" : null,
+        }));
+        setCourses(fetchedCourses);
+      } catch (err) {
+        console.error("Error fetching courses:", err);
+        setError("Failed to load courses. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
   const homeBtnStyle = {
     borderRadius: 10,
     minWidth: 120,
@@ -133,10 +112,6 @@ const Home = () => {
     transition: 'background 0.2s',
     boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
     display: 'inline-block',
-  };
-  const homeBtnHover = {
-    background: '#1e40af',
-    color: '#fff',
   };
 
   return (
@@ -170,7 +145,11 @@ const Home = () => {
             </p>
             <div style={{ marginTop: 20 }}>
               <Link to="/courses" className="btn radius-xl" style={{ ...homeBtnStyle, marginRight: 10 }}>BROWSE COURSES</Link>
-              <Link to="/contact" className="btn radius-xl" style={homeBtnStyle}>CONTACT US</Link>
+              {isLoggedIn ? (
+                <Link to="/profile" className="btn radius-xl" style={homeBtnStyle}>PROFILE</Link>
+              ) : (
+                <Link to="/login" className="btn radius-xl" style={homeBtnStyle}>LOGIN</Link>
+              )}
             </div>
           </div>
         </div>
@@ -214,43 +193,59 @@ const Home = () => {
             </div>
           </div>
           <div className="row">
-            {popularCourses.map((course, idx) => (
-              <div className="col-md-4 col-sm-6" key={course.id}>
-                <div className="cours-bx d-flex flex-column h-100" style={{ minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#ffe6b3', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <div className="action-box" style={{ position: 'relative' }}>
-                      <img src={course.img} alt={course.title} style={{ width: '100%', borderTopLeftRadius: 12, borderTopRightRadius: 12, height: 150, objectFit: 'cover' }} />
-                      {course.badge && (
-                        <span style={{ 
-                          position: "absolute", 
-                          top: 12, 
-                          left: 12, 
-                          background: course.badge === "FREE" ? "#27ae60" : "#e67e22", 
-                          color: "#fff", 
-                          borderRadius: 6, 
-                          padding: "2px 10px", 
-                          fontSize: 13, 
-                          zIndex: 2
-                        }}>
-                          {course.badge}
-                        </span>
-                      )}
+            {loading ? (
+              <p>Loading courses...</p>
+            ) : error ? (
+              <p style={{ color: 'red' }}>{error}</p>
+            ) : courses.length === 0 ? (
+              <p>No courses available at the moment.</p>
+            ) : (
+              courses.map((course) => (
+                <div className="col-md-4 col-sm-6 mb-4" key={course._id}>
+                  <div className="cours-bx d-flex flex-column h-100" style={{
+                    minHeight: 340,
+                    background: '#ffe6b3',
+                    borderRadius: 12,
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <div className="action-box" style={{ position: 'relative' }}>
+                        <img src={course.img} alt={course.title} style={{ width: '100%', height: 150, objectFit: 'cover' }} />
+                        {course.badge && (
+                          <span style={{
+                            position: "absolute",
+                            top: 12,
+                            left: 12,
+                            background: course.badge === "FREE" ? "#27ae60" : "#e67e22",
+                            color: "#fff",
+                            borderRadius: 6,
+                            padding: "2px 10px",
+                            fontSize: 13,
+                            zIndex: 2
+                          }}>
+                            {course.badge}
+                          </span>
+                        )}
+                      </div>
+                      <div className="info-bx text-center" style={{ padding: '12px', flexGrow: 1 }}>
+                        <h5 style={{ fontWeight: 600, fontSize: 18, marginBottom: 6, minHeight: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Link to={`/course-details/${course._id}`}>{course.title}</Link>
+                        </h5>
+                        <span style={{ color: '#444', fontSize: 15 }}>{course.provider}</span>
+                      </div>
+                      <div className="price" style={{ margin: '0 12px 12px 12px', textAlign: 'center', fontWeight: 700, fontSize: 22, color: '#222' }}>
+                        {course.oldPrice && <del style={{ color: '#888', marginRight: 8, fontSize: 16 }}>{course.oldPrice}</del>}
+                        <span>{course.price}</span>
+                      </div>
                     </div>
-                    <div className="info-bx text-center" style={{ padding: 12 }}>
-                      <h5 style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}><Link to={`/course-details/${course.id}`}>{course.title}</Link></h5>
-                      <span style={{ color: '#444', fontSize: 15 }}>{course.provider}</span>
+                    <div className="d-flex flex-column align-items-center" style={{ padding: '0 12px 12px 12px', background: 'transparent' }}>
+                      <Link to={`/course-details/${course._id}`} className="btn" style={{ ...homeBtnStyle, width: '100%', margin: 0, borderRadius: 10, textAlign: 'center' }}>Read More</Link>
                     </div>
-                    <div className="price" style={{ margin: '0 auto 8px auto', textAlign: 'center', fontWeight: 700, fontSize: 22, color: '#222' }}>
-                      {course.oldPrice && <del style={{ color: '#888', marginRight: 8, fontSize: 16 }}>{course.oldPrice}</del>}
-                      <span>{course.price}</span>
-                    </div>
-                  </div>
-                  <div className="d-flex flex-column align-items-center" style={{ padding: 12, background: 'transparent' }}>
-                    <Link to={`/course-details/${course.id}`} className="btn" style={{ ...homeBtnStyle, width: '100%', margin: 0, borderRadius: 10, textAlign: 'center' }}>Read More</Link>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
           <div className="text-center" style={{ marginTop: 30 }}>
             <Link to="/courses" className="btn" style={homeBtnStyle}>View All Courses</Link>
@@ -316,40 +311,8 @@ const Home = () => {
             </div>
           </div>
           <div className="row">
-            {/* Use the first three events from Events.jsx's eventsData, and match the card design from Events page */}
-            {[
-              {
-                img: "/assets/images/event/1.png",
-                type: "happening",
-                date: "15",
-                month: "July",
-                title: "AI in Career Guidance Workshop",
-                time: "9:00am 10:00am",
-                location: "Nagpur , India",
-                desc: "An AI-driven system that recommends tailored study plans, practice tests, and resources based on user performance, role preferences , and career goals."
-              },
-              {
-                img: "/assets/images/event/2.png",
-                type: "upcoming",
-                date: "21",
-                month: "August",
-                title: "Resume Building Bootcamp ",
-                time: "11:00am 12:00am",
-                location: "Nagpur , India",
-                desc: "An online tool to create professional resumes and is a hands-on workshop where participants learn how to create job-winning resumes tailored for campus  placements,with templates optimized for ATS."
-              },
-              {
-                img: "/assets/images/event/3.png",
-                type: "upcoming",
-                date: "29",
-                month: "August",
-                title: "Aptitude Mastery to Succeed in Competitive Exams",
-                time: "9:00am 10:00am",
-                location: "Nagpur , India",
-                desc: "Specialized training modules focused on quantitative aptitude, logical reasoning, critical thinking and verbal ability to excel in campus placement tests and competitive exams."
-              }
-            ].map((event, idx) => (
-              <div className="col-md-4 col-sm-6" key={event.img}>
+            {allEvents.map((event, idx) => (
+              <div className="col-md-4 col-sm-6" key={idx}>
                 <div className="event-bx d-flex flex-column h-100" style={{ minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#ffe6b3', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', width: '100%' }}>
                   <div className="action-box" style={{ position: 'relative' }}>
                     <img src={event.img} alt={event.title} style={{ width: '100%', height: 150, objectFit: 'cover', borderTopLeftRadius: 12, borderTopRightRadius: 12, display: 'block' }} />
@@ -391,7 +354,7 @@ const Home = () => {
           </div>
           <div className="row">
             {testimonialImages.map((img, idx) => (
-              <div className="col-md-6" key={img}>
+              <div className="col-md-6" key={idx}>
                 <div className="testimonial-bx">
                   <div className="testimonial-thumb">
                     <img src={img} alt="Testimonial" />
@@ -413,4 +376,4 @@ const Home = () => {
   );
 };
 
-export default Home; 
+export default Home;
