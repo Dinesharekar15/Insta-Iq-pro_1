@@ -3,7 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './database/connection.js';
 import userRoutes from './Routes/userRoutes.js';
-
+import { auth } from './middelwares/auth.js';
+import courseRoutes from './Routes/courseRoute.js';
 // Load environment variables
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
 
 // Health check / root route
 app.get('/', (req, res) => {
