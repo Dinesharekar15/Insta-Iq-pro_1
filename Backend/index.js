@@ -1,32 +1,47 @@
 import express from 'express';
-import cors from 'cors';
+import cors from 'cors'; // Import cors middleware
 import dotenv from 'dotenv';
-import connectDB from './database/connection.js';
-import userRoutes from './Routes/userRoutes.js';
-import { auth } from './middelwares/auth.js';
-import courseRoutes from './Routes/courseRoute.js';
+import connectDB from './config/connection.js'; // Updated path for db connection
+import authRoutes from './Routes/authRoutes.js';
+import userRoutes from './Routes/userRoutes.js'; // CORRECTED: This should import userRoutes.js
+import courseRoutes from './Routes/courseRoutes.js';
+import contactRoutes from './Routes/contactRoutes.js';
+
 // Load environment variables
 dotenv.config();
-
-// Initialize app
-const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
 connectDB();
 
+// Initialize app
+const app = express();
+
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // Use cors middleware
+app.use(express.json()); // Middleware to parse JSON request bodies
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/courses', courseRoutes);
-
-// Health check / root route
+// Basic route for testing
 app.get('/', (req, res) => {
-  res.send('This is hello from Dinesh branch!');
+  res.send('API is running...');
 });
+
+// Mount routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes); // Now correctly using userRoutes.js
+app.use('/api/courses', courseRoutes);
+app.use('/api/contact', contactRoutes);
+
+// Error handling middleware (for asyncHandler errors)
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack, // Don't expose stack in production
+  });
+});
+
+const PORT = process.env.PORT || 5000;
 
 // Start server
 app.listen(PORT, () => {

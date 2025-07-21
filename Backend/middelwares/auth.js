@@ -1,21 +1,56 @@
-// middleware/auth.js
 import jwt from 'jsonwebtoken';
+import asyncHandler from 'express-async-handler'; // A simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers.
+import User from '../models/userModel.js';
+import jwtSecret from '../config/jwt.js';
 
-export const auth = (req, res, next) => {
-    const authHeader = req.headers.authorization;
+// Middleware to protect routes by verifying JWT
+const protect = asyncHandler(async (req, res, next) => {
+  let token;
 
-    if (authHeader?.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1];
+  // Check if the Authorization header exists and starts with 'Bearer'
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      // Get token from header
+      token = req.headers.authorization.split(' ')[1];
 
-        jwt.verify(token, process.env.JWT_SECRET, (err, decodedUser) => {
-            if (err) {
-                return res.status(403).json({ message: 'Invalid or expired token' });
-            }
+      // Verify token
+      const decoded = jwt.verify(token, jwtSecret);
 
-            req.user = decodedUser;
-            next();
-        });
-    } else {
-        return res.status(401).json({ message: 'Authorization header missing or malformed' });
+      // Find user by ID from the token payload and attach to request object
+      // Exclude password from the returned user object
+      req.user = await User.findById(decoded.id).select('-password');
+
+      if (!req.user) {
+        res.status(401);
+        throw new Error('Not authorized, user not found');
+      }
+
+      next(); // Proceed to the next middleware/route handler
+    } catch (error) {
+      console.error(error);
+      res.status(401);
+      throw new Error('Not authorized, token failed');
     }
+  }
+
+  // If no token is found
+  if (!token) {
+    res.status(401);
+    throw new Error('Not authorized, no token');
+  }
+});
+
+// Middleware to authorize users based on their roles
+const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    // Check if req.user exists and its role is included in the allowed roles
+    if (!req.user || !roles.includes(req.user.role)) {
+      res.status(403); // Forbidden
+      throw new Error(`User role ${req.user ? req.user.role : 'unauthenticated'} is not authorized to access this route`);
+    }
+    next(); // User is authorized, proceed
+  };
 };
+
+export { protect, authorizeRoles };
+
