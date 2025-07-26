@@ -29,6 +29,17 @@ const courseSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    details: [ // NEW FIELD: Array of strings for course details/features
+      {
+        type: String,
+      },
+    ],
+    purchasedBy: [ // NEW FIELD: Array to store IDs of users who purchased this course
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Reference to the User model
+      },
+    ],
   },
   {
     timestamps: true,

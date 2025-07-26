@@ -16,6 +16,20 @@ const getAllCourses = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Get a single course by ID
+// @route   GET /api/courses/:id
+// @access  Public
+const getCourseById = asyncHandler(async (req, res) => {
+  const course = await Course.findById(req.params.id).select('title description price imageUrl details');
+
+  if (course) {
+    res.json(course);
+  } else {
+    res.status(404);
+    throw new Error('Course not found');
+  }
+});
+
 // @desc    Purchase a course
 // @route   POST /api/courses/:id/purchase
 // @access  Private (User)
@@ -42,11 +56,21 @@ const purchaseCourse = asyncHandler(async (req, res) => {
     throw new Error('Course already purchased');
   }
 
+  // Check if the course has already been purchased by this user
+  if (course.purchasedBy.includes(userId)) {
+    res.status(400);
+    throw new Error('Course already marked as purchased by this user (internal consistency error)');
+  }
+
   // Add the course to the user's purchasedCourses array
   user.purchasedCourses.push(courseId);
   await user.save();
 
+  // NEW: Add the user to the course's purchasedBy array
+  course.purchasedBy.push(userId);
+  await course.save();
+
   res.status(200).json({ message: 'Course purchased successfully!', course: course.title });
 });
 
-export { getAllCourses, purchaseCourse };
+export { getAllCourses, purchaseCourse,getCourseById };

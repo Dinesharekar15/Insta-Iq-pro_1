@@ -6,6 +6,8 @@ import authRoutes from './Routes/authRoutes.js';
 import userRoutes from './Routes/userRoutes.js'; // CORRECTED: This should import userRoutes.js
 import courseRoutes from './Routes/courseRoutes.js';
 import contactRoutes from './Routes/contactRoutes.js';
+import adminRoutes from './Routes/adminRoutes.js'; // New: Import admin routes
+import eventRoutes from './Routes/eventRoutes.js'; // New: Import event routes
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +32,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes); // Now correctly using userRoutes.js
 app.use('/api/courses', courseRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/events', eventRoutes); // New: Mount event routes
 
 // Error handling middleware (for asyncHandler errors)
 app.use((err, req, res, next) => {
