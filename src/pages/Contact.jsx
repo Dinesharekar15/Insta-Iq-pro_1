@@ -1,7 +1,58 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios"; // Import Axios
+
+// Define your backend base URL from environment variables using import.meta.env
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+console.log("Backend URL (Contact Page):", import.meta.env.VITE_BACKEND_URL); // Log the URL for debugging
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "", // CORRECTED: Changed back to 'phone' to match backend model
+    subject: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  // Handle input changes
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    setLoading(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/contact`, formData);
+      setSuccessMessage(response.data.message || "Your message has been sent successfully!");
+      setFormData({ // Clear form fields on success
+        name: "",
+        email: "",
+        phone: "", // Clear 'phone' field
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      console.error("Error submitting contact form:", error.response ? error.response.data : error.message);
+      setErrorMessage(
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : "Failed to send message. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="page-content bg-white">
       {/* inner page banner */}
@@ -15,7 +66,6 @@ const Contact = () => {
           </div>
         </div>
       </div>
-      {/* Breadcrumb row removed */}
       {/* inner page banner */}
       <div className="page-banner contact-page section-sp2">
         <div className="container">
@@ -85,8 +135,12 @@ const Contact = () => {
               </div>
             </div>
             <div className="col-lg-7 col-md-7">
-              <form className="contact-bx ajax-form">
-                <div className="ajax-message"></div>
+              <form className="contact-bx ajax-form" onSubmit={handleSubmit}> {/* Added onSubmit handler */}
+                {/* Message display area */}
+                {loading && <div className="alert alert-info">Sending message...</div>}
+                {successMessage && <div className="alert alert-success">{successMessage}</div>}
+                {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+
                 <div className="heading-bx left">
                   <h2 className="title-head">Connect with us</h2>
                   &nbsp;<h5>send us your query</h5>
@@ -101,6 +155,8 @@ const Contact = () => {
                           required
                           className="form-control valid-character"
                           placeholder="Your Name"
+                          value={formData.name}
+                          onChange={handleChange}
                         />
                       </div>
                     </div>
@@ -114,6 +170,8 @@ const Contact = () => {
                           className="form-control"
                           required
                           placeholder="Your Email Address"
+                          value={formData.email}
+                          onChange={handleChange}
                         />
                       </div>
                     </div>
@@ -122,11 +180,13 @@ const Contact = () => {
                     <div className="form-group">
                       <div className="input-group">
                         <input
-                          name="phone"
+                          name="phone" // CORRECTED: Changed name back to 'phone' to match backend model
                           type="text"
                           required
                           className="form-control int-value"
-                          placeholder="Your Phone"
+                          placeholder="Your Phone" // Updated placeholder to match 'phone'
+                          value={formData.phone} // CORRECTED: Changed value to formData.phone
+                          onChange={handleChange}
                         />
                       </div>
                     </div>
@@ -140,6 +200,8 @@ const Contact = () => {
                           required
                           className="form-control"
                           placeholder="Subject"
+                          value={formData.subject}
+                          onChange={handleChange}
                         />
                       </div>
                     </div>
@@ -153,6 +215,8 @@ const Contact = () => {
                           className="form-control"
                           required
                           placeholder="Type Message"
+                          value={formData.message}
+                          onChange={handleChange}
                         ></textarea>
                       </div>
                     </div>
@@ -163,8 +227,9 @@ const Contact = () => {
                       type="submit"
                       value="Submit"
                       className="btn button-md"
+                      disabled={loading} // Disable button while loading
                     >
-                      Send Message
+                      {loading ? "Sending..." : "Send Message"}
                     </button>
                   </div>
                 </div>
@@ -178,4 +243,4 @@ const Contact = () => {
   );
 };
 
-export default Contact; 
+export default Contact;

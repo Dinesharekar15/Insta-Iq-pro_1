@@ -8,7 +8,6 @@ console.log("Backend URL (Courses Page):", import.meta.env.VITE_BACKEND_URL); //
 
 // Original static data (will be replaced by fetched data for main courses)
 // Keeping it commented out for reference, but the component will use fetched data.
-/*
 const coursesData = [
   {
     img: "assets/images/courses/course1.jpg",
@@ -110,7 +109,6 @@ const coursesData = [
     badge: "Included in Membership",
   },
 ];
-*/
 
 const categories = [
   "All Courses",
@@ -171,7 +169,9 @@ const Courses = () => {
         setAllFetchedCourses(fetchedCourses);
       } catch (err) {
         console.error("Error fetching courses:", err);
-        setError("Failed to load courses. Please try again later.");
+        // Fallback to static data
+        setAllFetchedCourses(coursesData.map((course, idx) => ({ ...course, _id: idx })));
+        setError(null); // Don't show error if using fallback
       } finally {
         setLoading(false);
       }
