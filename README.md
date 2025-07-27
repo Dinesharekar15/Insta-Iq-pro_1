@@ -1,20 +1,79 @@
-# React Template Project – Real Stripe Payment Integration
+# Insta IQ Pro - Educational Platform
 
-This project is a React-based template adapted from an HTML theme, featuring dynamic pages for login, registration, blog, courses, cart, and checkout. It currently uses Stripe's test mode for payment simulation. To enable **real payments** with Stripe, follow the steps below.
+A modern React-based educational platform built with Vite, featuring course management, blog, membership system, and integrated Stripe payments.
 
----
+## 🚀 Quick Start
 
-## How to Enable Real Stripe Payments
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd Insta-Iq-pro_1
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser**
+   Navigate to `http://localhost:3000`
+
+## 📜 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 19, React Router DOM
+- **Build Tool**: Vite
+- **Styling**: CSS3, Bootstrap
+- **Payment**: Stripe
+- **HTTP Client**: Axios
+- **Linting**: ESLint
+
+## 📁 Project Structure
+
+```
+src/
+├── components/     # Reusable components
+├── pages/         # Page components
+├── context/       # React Context providers
+├── assets/        # Static assets
+└── main.jsx       # Application entry point
+```
+
+## 💳 Stripe Payment Integration
 
 ### 1. Create a Stripe Account
+
 - Go to [https://dashboard.stripe.com/register](https://dashboard.stripe.com/register) and sign up for a free Stripe account.
 
 ### 2. Get Your Live API Keys
+
 - In the Stripe dashboard, switch from "Test mode" to "Live mode" (toggle in the left sidebar).
 - Go to **Developers > API keys**.
 - Copy your **Publishable key** and **Secret key** (starts with `pk_live_...` and `sk_live_...`).
 
 ### 3. Update Your React App
+
 - In your React app, locate where the Stripe publishable key is used (usually in `src/pages/Checkout.jsx` or a Stripe config file).
 - Replace the test key (`pk_test_...`) with your **live publishable key**.
 
@@ -26,25 +85,28 @@ This project is a React-based template adapted from an HTML theme, featuring dyn
 ```
 
 ### 4. Set Up a Backend for Real Payments
+
 Stripe **requires a backend** to securely create PaymentIntents and handle secret keys. You cannot process real payments from the frontend only.
 
 #### Example Node.js/Express Backend
+
 1. Install dependencies:
    ```bash
    npm install express stripe cors
    ```
 2. Create a file (e.g., `server.js`):
+
    ```js
-   const express = require('express');
-   const Stripe = require('stripe');
-   const cors = require('cors');
+   const express = require("express");
+   const Stripe = require("stripe");
+   const cors = require("cors");
    const app = express();
-   const stripe = Stripe('sk_live_YOUR_SECRET_KEY');
+   const stripe = Stripe("sk_live_YOUR_SECRET_KEY");
 
    app.use(cors());
    app.use(express.json());
 
-   app.post('/create-payment-intent', async (req, res) => {
+   app.post("/create-payment-intent", async (req, res) => {
      const { amount, currency } = req.body;
      try {
        const paymentIntent = await stripe.paymentIntents.create({
@@ -57,20 +119,23 @@ Stripe **requires a backend** to securely create PaymentIntents and handle secre
      }
    });
 
-   app.listen(4242, () => console.log('Server running on port 4242'));
+   app.listen(4242, () => console.log("Server running on port 4242"));
    ```
+
 3. Start your backend:
    ```bash
    node server.js
    ```
 
 #### Update Your Frontend to Use the Backend
+
 - In your React app, update the payment flow to call your backend's `/create-payment-intent` endpoint to get a `clientSecret` for Stripe Elements.
 - Use this `clientSecret` to complete the payment.
 
 ---
 
 ## Security Notes
+
 - **Never expose your Stripe secret key in frontend code.**
 - Always use HTTPS in production.
 - Test thoroughly in Stripe's test mode before going live.
@@ -78,6 +143,7 @@ Stripe **requires a backend** to securely create PaymentIntents and handle secre
 ---
 
 ## Need Help?
+
 - See [Stripe’s React integration docs](https://stripe.com/docs/stripe-js/react) for more details.
 - For backend setup, see [Stripe’s server quickstart](https://stripe.com/docs/payments/accept-a-payment?platform=web&ui=elements#web-create-payment-intent).
-- If you need help wiring up the backend or connecting it to your React app, ask your assistant for step-by-step guidance! 
+- If you need help wiring up the backend or connecting it to your React app, ask your assistant for step-by-step guidance!
