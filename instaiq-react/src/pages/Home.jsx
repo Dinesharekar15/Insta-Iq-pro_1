@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axios from "axios"; // Import Axios
 
 // Define your backend base URL from environment variables using import.meta.env
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
@@ -13,11 +13,6 @@ const serviceImages = [
   "assets/images/our-services/pic3.jpg",
 ];
 
-const eventImages = [
-  "assets/images/event/pic4.jpg",
-  "assets/images/event/pic3.jpg",
-  "assets/images/event/pic2.jpg",
-];
 const testimonialImages = [
   "assets/images/testimonials/pic1.jpg",
   "assets/images/testimonials/pic2.jpg",
@@ -28,41 +23,18 @@ const newsImages = [
   "assets/images/blog/latest-blog/pic3.jpg",
 ];
 
-export const allEvents = [
-  {
-    img: "/assets/images/event/1.png",
-    date: "15",
-    month: "July",
-    title: "AI in Career Guidance Workshop",
-    time: "9:00am 10:00am",
-    location: "Nagpur , India",
-    desc: "An AI-driven system that recommends tailored study plans, practice tests, and resources based on user performance, role preferences , and career goals."
-  },
-  {
-    img: "/assets/images/event/2.png",
-    date: "21",
-    month: "August",
-    title: "Resume Building Bootcamp ",
-    time: "11:00am 12:00am",
-    location: "Nagpur , India",
-    desc: "An online tool to create professional resumes and is a hands-on workshop where participants learn how to create job-winning resumes tailored for campus  placements,with templates optimized for ATS."
-  },
-  {
-    img: "/assets/images/event/3.png",
-    date: "29",
-    month: "August",
-    title: "Aptitude Mastery to Succeed in Competitive Exams",
-    time: "9:00am 10:00am",
-    location: "Nagpur , India",
-    desc: "Specialized training modules focused on quantitative aptitude, logical reasoning, critical thinking and verbal ability to excel in campus placement tests and competitive exams."
-  }
-];
+// Removed hardcoded allEvents as it will be fetched from backend
+// export const allEvents = [...];
 
 const Home = () => {
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // New state for login status
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [coursesError, setCoursesError] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [upcomingEvents, setUpcomingEvents] = useState([]); // State for fetched events
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [eventsError, setEventsError] = useState(null);
 
   // Check login status on component mount
   useEffect(() => {
@@ -72,13 +44,13 @@ const Home = () => {
     } else {
       setIsLoggedIn(false);
     }
-  }, []); // Run once on mount
+  }, []);
 
   // Fetch courses from the backend when the component mounts
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        setLoading(true);
+        setLoadingCourses(true);
         const response = await axios.get(`${API_BASE_URL}/courses`);
         const fetchedCourses = response.data.map(course => ({
           _id: course._id,
@@ -92,15 +64,39 @@ const Home = () => {
         setCourses(fetchedCourses);
       } catch (err) {
         console.error("Error fetching courses:", err);
-        setError("Failed to load courses. Please try again later.");
+        setCoursesError("Failed to load courses. Please try again later.");
       } finally {
-        setLoading(false);
+        setLoadingCourses(false);
       }
     };
 
     fetchCourses();
   }, []);
 
+  // Fetch upcoming events from the backend when the component mounts
+  useEffect(() => {
+    const fetchUpcomingEvents = async () => {
+      setLoadingEvents(true);
+      setEventsError(null);
+      try {
+        const response = await axios.get(`${API_BASE_URL}/events`);
+        // Filter for upcoming events and take the first 3
+        const filteredAndSlicedEvents = response.data
+          .filter(event => event.type === 'upcoming')
+          .slice(0, 3);
+        setUpcomingEvents(filteredAndSlicedEvents);
+      } catch (err) {
+        console.error("Error fetching events:", err.response ? err.response.data : err.message);
+        setEventsError("Failed to load events. Please try again later.");
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+
+    fetchUpcomingEvents();
+  }, []);
+
+  // Button style for all homepage buttons
   const homeBtnStyle = {
     borderRadius: 10,
     minWidth: 120,
@@ -193,10 +189,10 @@ const Home = () => {
             </div>
           </div>
           <div className="row">
-            {loading ? (
+            {loadingCourses ? (
               <p>Loading courses...</p>
-            ) : error ? (
-              <p style={{ color: 'red' }}>{error}</p>
+            ) : coursesError ? (
+              <p style={{ color: 'red' }}>{coursesError}</p>
             ) : courses.length === 0 ? (
               <p>No courses available at the moment.</p>
             ) : (
@@ -234,7 +230,7 @@ const Home = () => {
                         </h5>
                         <span style={{ color: '#444', fontSize: 15 }}>{course.provider}</span>
                       </div>
-                      <div className="price" style={{ margin: '0 12px 12px 12px', textAlign: 'center', fontWeight: 700, fontSize: 22, color: '#222' }}>
+                      <div className="price" style={{ margin: '0 auto 8px auto', textAlign: 'center', fontWeight: 700, fontSize: 22, color: '#222' }}>
                         {course.oldPrice && <del style={{ color: '#888', marginRight: 8, fontSize: 16 }}>{course.oldPrice}</del>}
                         <span>{course.price}</span>
                       </div>
@@ -311,31 +307,39 @@ const Home = () => {
             </div>
           </div>
           <div className="row">
-            {allEvents.map((event, idx) => (
-              <div className="col-md-4 col-sm-6" key={idx}>
-                <div className="event-bx d-flex flex-column h-100" style={{ minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#ffe6b3', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', width: '100%' }}>
-                  <div className="action-box" style={{ position: 'relative' }}>
-                    <img src={event.img} alt={event.title} style={{ width: '100%', height: 150, objectFit: 'cover', borderTopLeftRadius: 12, borderTopRightRadius: 12, display: 'block' }} />
-                  </div>
-                  <div className="info-bx text-center" style={{ padding: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-                      <div className="event-time" style={{ background: '#2563eb', color: '#fff', borderRadius: 8, padding: '8px 16px', marginRight: 10, minWidth: 60 }}>
-                        <div className="event-date" style={{ fontSize: 24, fontWeight: 700 }}>{event.date}</div>
-                        <div className="event-month" style={{ fontSize: 14 }}>{event.month}</div>
-                      </div>
-                      <div style={{ textAlign: 'left' }}>
-                        <h5 style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>{event.title}</h5>
-                        <ul className="media-post" style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: 13, color: '#444' }}>
-                          <li style={{ display: 'inline', marginRight: 10 }}><i className="fa fa-clock-o"></i> {event.time}</li>
-                          <li style={{ display: 'inline' }}><i className="fa fa-map-marker"></i> {event.location}</li>
-                        </ul>
-                      </div>
+            {loadingEvents ? (
+              <p>Loading events...</p>
+            ) : eventsError ? (
+              <p style={{ color: 'red' }}>{eventsError}</p>
+            ) : upcomingEvents.length === 0 ? (
+              <p>No upcoming events available at the moment.</p>
+            ) : (
+              upcomingEvents.map((event) => (
+                <div className="col-md-4 col-sm-6" key={event._id}>
+                  <div className="event-bx d-flex flex-column h-100" style={{ minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#ffe6b3', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', width: '100%' }}>
+                    <div className="action-box" style={{ position: 'relative' }}>
+                      <img src={event.img} alt={event.title} style={{ width: '100%', height: 150, objectFit: 'cover', borderTopLeftRadius: 12, borderTopRightRadius: 12, display: 'block' }} />
                     </div>
-                    <p style={{ color: '#444', fontSize: 15, marginTop: 8 }}>{event.desc}</p>
+                    <div className="info-bx text-center" style={{ padding: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                        <div className="event-time" style={{ background: '#2563eb', color: '#fff', borderRadius: 8, padding: '8px 16px', marginRight: 10, minWidth: 60 }}>
+                          <div className="event-date" style={{ fontSize: 24, fontWeight: 700 }}>{event.date}</div>
+                          <div className="event-month" style={{ fontSize: 14 }}>{event.month}</div>
+                        </div>
+                        <div style={{ textAlign: 'left' }}>
+                          <h5 style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>{event.title}</h5>
+                          <ul className="media-post" style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: 13, color: '#444' }}>
+                            <li style={{ display: 'inline', marginRight: 10 }}><i className="fa fa-clock-o"></i> {event.time}</li>
+                            <li style={{ display: 'inline' }}><i className="fa fa-map-marker"></i> {event.location}</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <p style={{ color: '#444', fontSize: 15, marginTop: 8 }}>{event.desc}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
           <div className="text-center">
             <Link to="/events" className="btn" style={homeBtnStyle}>View All Events</Link>
