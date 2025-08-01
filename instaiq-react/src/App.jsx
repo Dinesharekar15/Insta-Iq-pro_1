@@ -13,16 +13,14 @@ import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 import Register from "./pages/Register";
 import Contact from "./pages/Contact";
-import BlogDetails1 from "./pages/BlogDetails1";
-import BlogDetails2 from "./pages/BlogDetails2";
-import BlogDetails3 from "./pages/BlogDetails3";
+import BlogDetails from "./pages/BlogDetails";
+
 import CourseDetails from "./pages/CourseDetails";
 import Checkout from "./pages/Checkout";
 import FAQ from "./pages/FAQ";
 import Events from "./pages/Events";
 import Profile from "./pages/profile"; // Import the Profile component
-// import AdminPanel from "./pages/AdminPanel";
-
+// import AdminPanel from "./pages/AdminPanel"; // Import the AdminPanel component
 // Main App component with routing
 function App() {
   return (
@@ -41,9 +39,7 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/register" element={<Register />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/blog-details1" element={<BlogDetails1 />} />
-          <Route path="/blog-details2" element={<BlogDetails2 />} />
-          <Route path="/blog-details3" element={<BlogDetails3 />} />
+          <Route path="/blog-details/:id" element={<BlogDetails />} />
           <Route path="/course-details/:id" element={<CourseDetails />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/events" element={<Events />} />

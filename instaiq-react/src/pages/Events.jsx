@@ -1,68 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
-const eventsData = [
-  {
-    img: "/assets/images/event/1.png",
-    type: "happening",
-    date: "15",
-    month: "July",
-    title: "AI in Career Guidance Workshop",
-    time: "9:00am 10:00am",
-    location: "Nagpur , India",
-    desc: "An AI-driven system that recommends tailored study plans, practice tests, and resources based on user performance, role preferences , and career goals."
-  },
-  {
-    img: "/assets/images/event/2.png",
-    type: "upcoming",
-    date: "21",
-    month: "August",
-    title: "Resume Building Bootcamp ",
-    time: "11:00am 12:00am",
-    location: "Nagpur , India",
-    desc: "An online tool to create professional resumes and is a hands-on workshop where participants learn how to create job-winning resumes tailored for campus  placements,with templates optimized for ATS."
-  },
-  {
-    img: "/assets/images/event/3.png",
-    type: "upcoming",
-    date: "29",
-    month: "August",
-    title: "Aptitude Mastery to Succeed in Competitive Exams",
-    time: "9:00am 10:00am",
-    location: "Nagpur , India",
-    desc: "Specialized training modules focused on quantitative aptitude, logical reasoning, critical thinking and verbal ability to excel in campus placement tests and competitive exams."
-  },
-  {
-    img: "/assets/images/event/4.png",
-    type: "happening",
-    date: "9",
-    month: "September",
-    title: "Job Matching and Placement Portal",
-    time: "7:00am 8:00am",
-    location: "Nagpur , India",
-    desc: "A portal that matches students with job opportunities based on test scores, skills, and company preferences, integrated with recruiters or platforms like LinkedIn. "
-  },
-  {
-    img: "/assets/images/event/5.png",
-    type: "expired",
-    date: "2",
-    month: "October",
-    title: "Interview Preparation",
-    time: "7:00am 8:00am",
-    location: "Nagpur , India",
-    desc: "Targeted modules to prepare students for technical and HR interviews through mock interviews, question banks, and behavioral tips, focusing on top recruiters’."
-  },
-  {
-    img: "/assets/images/event/6.png",
-    type: "happening",
-    date: "29",
-    month: "October",
-    title: "Quiz for Practice",
-    time: "7:00am 8:00am",
-    location: "Nagpur , India",
-    desc: "A dedicated quiz module offering bite-sized practice questions on aptitude, logical reasoning ,coding and verbal skills, designed to be engaging,time-efficient, and progressively challenging for daily practice."
-  }
-];
+// Define your backend base URL from environment variables using import.meta.env
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+console.log("Backend URL (Events Page):", import.meta.env.VITE_BACKEND_URL);
 
+// Filter types for events
 const filterTypes = [
   { label: "All", value: "all" },
   { label: "Happening", value: "happening" },
@@ -71,11 +15,37 @@ const filterTypes = [
 ];
 
 const Events = () => {
+  const [allFetchedEvents, setAllFetchedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
+
+  // Fetch events from the backend when the component mounts
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Fetch from the public events endpoint
+        const response = await axios.get(`${API_BASE_URL}/events`);
+        setAllFetchedEvents(response.data);
+      } catch (err) {
+        console.error("Error fetching events:", err.response ? err.response.data : err.message);
+        setError("Failed to load events. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Filter events by type
   const filteredEvents =
     filter === "all"
-      ? eventsData
-      : eventsData.filter((event) => event.type === filter);
+      ? allFetchedEvents
+      : allFetchedEvents.filter((event) => event.type === filter);
 
   return (
     <div className="page-content bg-white">
@@ -87,8 +57,7 @@ const Events = () => {
           </div>
         </div>
       </div>
-      {/* Breadcrumb removed as per user request */}
-      {/* Events Section - matches event.html */}
+      {/* Events Section */}
       <div className="content-block">
         <div className="section-area section-sp1 gallery-bx">
           <div className="container">
@@ -110,37 +79,45 @@ const Events = () => {
               </ul>
             </div>
             <div className="clearfix">
-              <ul id="masonry" className="ttr-gallery-listing magnific-image row" style={{ listStyle: 'none', padding: 0 }}>
-                {filteredEvents.map((event, idx) => (
-                  <li
-                    key={idx}
-                    className={`action-card col-lg-4 col-md-6 col-sm-12 ${event.type}`}
-                    style={{ display: 'flex', justifyContent: 'center', marginBottom: 30 }}
-                  >
-                    <div className="event-bx d-flex flex-column h-100" style={{ minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#ffe6b3', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', width: '100%' }}>
-                      <div className="action-box" style={{ position: 'relative' }}>
-                        <img src={event.img} alt={event.title} style={{ width: '100%', height: 150, objectFit: 'cover', borderTopLeftRadius: 12, borderTopRightRadius: 12, display: 'block' }} />
-                      </div>
-                      <div className="info-bx text-center" style={{ padding: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-                          <div className="event-time" style={{ background: '#2563eb', color: '#fff', borderRadius: 8, padding: '8px 16px', marginRight: 10, minWidth: 60 }}>
-                            <div className="event-date" style={{ fontSize: 24, fontWeight: 700 }}>{event.date}</div>
-                            <div className="event-month" style={{ fontSize: 14 }}>{event.month}</div>
-                          </div>
-                          <div style={{ textAlign: 'left' }}>
-                            <h5 style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>{event.title}</h5>
-                            <ul className="media-post" style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: 13, color: '#444' }}>
-                              <li style={{ display: 'inline', marginRight: 10 }}><i className="fa fa-clock-o"></i> {event.time}</li>
-                              <li style={{ display: 'inline' }}><i className="fa fa-map-marker"></i> {event.location}</li>
-                            </ul>
-                          </div>
+              {loading ? (
+                <div className="col-12 text-center text-muted">Loading events...</div>
+              ) : error ? (
+                <div className="col-12 text-center text-danger">{error}</div>
+              ) : filteredEvents.length === 0 ? (
+                <div className="col-12 text-center text-muted">No events found matching your criteria.</div>
+              ) : (
+                <ul id="masonry" className="ttr-gallery-listing magnific-image row" style={{ listStyle: 'none', padding: 0 }}>
+                  {filteredEvents.map((event) => (
+                    <li
+                      key={event._id}
+                      className={`action-card col-lg-4 col-md-6 col-sm-12 ${event.type}`}
+                      style={{ display: 'flex', justifyContent: 'center', marginBottom: 30 }}
+                    >
+                      <div className="event-bx d-flex flex-column h-100" style={{ minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#ffe6b3', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', width: '100%' }}>
+                        <div className="action-box" style={{ position: 'relative' }}>
+                          <img src={event.imageUrl} alt={event.title} style={{ width: '100%', height: 150, objectFit: 'cover', borderTopLeftRadius: 12, borderTopRightRadius: 12, display: 'block' }} />
                         </div>
-                        <p style={{ color: '#444', fontSize: 15, marginTop: 8 }}>{event.desc}</p>
+                        <div className="info-bx text-center" style={{ padding: 12 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                            <div className="event-time" style={{ background: '#2563eb', color: '#fff', borderRadius: 8, padding: '8px 16px', marginRight: 10, minWidth: 60 }}>
+                              <div className="event-date" style={{ fontSize: 24, fontWeight: 700 }}>{event.date}</div>
+                              <div className="event-month" style={{ fontSize: 14 }}>{event.month}</div>
+                            </div>
+                            <div style={{ textAlign: 'left' }}>
+                              <h5 style={{ fontWeight: 600, fontSize: 18, marginBottom: 6 }}>{event.title}</h5>
+                              <ul className="media-post" style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: 13, color: '#444' }}>
+                                <li style={{ display: 'inline', marginRight: 10 }}><i className="fa fa-clock-o"></i> {event.time}</li>
+                                <li style={{ display: 'inline' }}><i className="fa fa-map-marker"></i> {event.location}</li>
+                              </ul>
+                            </div>
+                          </div>
+                          <p style={{ color: '#444', fontSize: 15, marginTop: 8 }}>{event.desc}</p>
+                        </div>
                       </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>
@@ -149,4 +126,4 @@ const Events = () => {
   );
 };
 
-export default Events; 
+export default Events;

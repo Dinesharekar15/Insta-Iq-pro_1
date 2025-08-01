@@ -318,7 +318,7 @@ const Home = () => {
                 <div className="col-md-4 col-sm-6" key={event._id}>
                   <div className="event-bx d-flex flex-column h-100" style={{ minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#ffe6b3', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', width: '100%' }}>
                     <div className="action-box" style={{ position: 'relative' }}>
-                      <img src={event.img} alt={event.title} style={{ width: '100%', height: 150, objectFit: 'cover', borderTopLeftRadius: 12, borderTopRightRadius: 12, display: 'block' }} />
+                      <img src={event.imageUrl} alt={event.title} style={{ width: '100%', height: 150, objectFit: 'cover', borderTopLeftRadius: 12, borderTopRightRadius: 12, display: 'block' }} />
                     </div>
                     <div className="info-bx text-center" style={{ padding: 12 }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
@@ -342,7 +342,7 @@ const Home = () => {
             )}
           </div>
           <div className="text-center">
-            <Link to="/events" className="btn" style={homeBtnStyle}>View All Events</Link>
+            <Link to="/events" className="btn mt-5" style={homeBtnStyle}>View All Events</Link>
           </div>
         </div>
       </section>
