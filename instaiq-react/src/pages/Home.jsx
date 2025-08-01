@@ -26,6 +26,37 @@ const newsImages = [
 // Removed hardcoded allEvents as it will be fetched from backend
 // export const allEvents = [...];
 
+// Static fallback for popular courses
+const popularCoursesData = [
+  {
+    img: "assets/images/courses/course1.jpg",
+    title: "ALL INDIA PLACEMENT APTITUDE TEST",
+    provider: "Insta iQ",
+    price: "Free",
+    oldPrice: null,
+    badge: "FREE",
+    _id: 1,
+  },
+  {
+    img: "assets/images/courses/course2.jpg",
+    title: "PLACEMENT APTITUDE COURSE",
+    provider: "Insta Education",
+    price: "₹6,999",
+    oldPrice: "₹9,999",
+    badge: "Included in Membership",
+    _id: 2,
+  },
+  {
+    img: "assets/images/courses/course3.jpg",
+    title: "ADVANCE EXCEL & DATA ANALYSIS",
+    provider: "Insta Education",
+    price: "₹4,500",
+    oldPrice: null,
+    badge: "Included in Membership",
+    _id: 3,
+  },
+];
+
 const Home = () => {
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
@@ -64,7 +95,8 @@ const Home = () => {
         setCourses(fetchedCourses);
       } catch (err) {
         console.error("Error fetching courses:", err);
-        setCoursesError("Failed to load courses. Please try again later.");
+        setCourses(popularCoursesData);
+        setError(null); // Don't show error if using fallback
       } finally {
         setLoadingCourses(false);
       }

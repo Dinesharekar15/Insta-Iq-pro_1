@@ -20,7 +20,9 @@ import Checkout from "./pages/Checkout";
 import FAQ from "./pages/FAQ";
 import Events from "./pages/Events";
 import Profile from "./pages/profile"; // Import the Profile component
-// import AdminPanel from "./pages/AdminPanel"; // Import the AdminPanel component
+import AdminPanel from "./pages/AdminPanel";
+import ForgetPassword from "./pages/ForgetPassword";
+
 // Main App component with routing
 function App() {
   return (
@@ -29,7 +31,7 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
-          {/* <Route path="/admin" element={<AdminPanel />} /> */}
+          <Route path="/admin" element={<AdminPanel />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/about" element={<About />} />
@@ -44,6 +46,7 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/events" element={<Events />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/forget-password" element={<ForgetPassword />} />
           <Route path="/profile" element={<Profile />} /> {/* Added the Profile route */}
           {/* 404 Not Found route */}
           <Route path="*" element={<NotFound />} />

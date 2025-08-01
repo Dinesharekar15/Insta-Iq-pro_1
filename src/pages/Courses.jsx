@@ -1,8 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios"; // Import Axios
 
-// Original courses array (unchanged)
-const courses = [
+// Define your backend base URL from environment variables using import.meta.env
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+console.log("Backend URL (Courses Page):", import.meta.env.VITE_BACKEND_URL); // Log the URL for debugging
+
+// Original static data (will be replaced by fetched data for main courses)
+// Keeping it commented out for reference, but the component will use fetched data.
+const coursesData = [
   {
     img: "assets/images/courses/course1.jpg",
     title: "ALL INDIA PLACEMENT APTITUDE TEST",
@@ -133,15 +139,55 @@ const recentCourses = [
 const COURSES_PER_PAGE = 6;
 
 const Courses = () => {
+  const [allFetchedCourses, setAllFetchedCourses] = useState([]); // Stores all courses from API
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Courses");
   const [page, setPage] = useState(1);
 
-  // Filter courses by search and category
-  const filteredCourses = courses.filter(
+  // Fetch courses from the backend when the component mounts
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${API_BASE_URL}/courses`);
+        // Map backend data to your frontend structure
+        const fetchedCourses = response.data.map(course => ({
+          _id: course._id, // Keep the backend ID
+          img: course.imageUrl, // Use imageUrl from backend
+          title: course.title,
+          provider: "Insta Education", // Static for now, or fetch from backend if available
+          price: `₹${course.price.toFixed(2)}`, // Format price
+          oldPrice: null, // Not available from backend currently
+          membership: course.price > 0, // Basic membership logic
+          badge: course.price === 0 ? "FREE" : (course.price > 0 ? "Included in Membership" : null), // Badge logic
+          rating: null, // Not available from backend currently
+          ratingsCount: null, // Not available from backend currently
+        }));
+        setAllFetchedCourses(fetchedCourses);
+      } catch (err) {
+        console.error("Error fetching courses:", err);
+        // Fallback to static data
+        setAllFetchedCourses(coursesData.map((course, idx) => ({ ...course, _id: idx })));
+        setError(null); // Don't show error if using fallback
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Filter courses by search and category (now based on fetched data)
+  const filteredCourses = allFetchedCourses.filter(
     (course) =>
       course.title.toLowerCase().includes(search.toLowerCase()) &&
       (selectedCategory === "All Courses" ||
+        // This category filtering logic is basic and assumes category is part of title.
+        // For robust category filtering, your backend would need a 'category' field on courses.
+        // For now, it will filter based on title containing the category name.
         (selectedCategory !== "All Courses" && course.title.toLowerCase().includes(selectedCategory.toLowerCase())))
   );
 
@@ -154,7 +200,7 @@ const Courses = () => {
 
   const handleCategoryClick = (cat) => {
     setSelectedCategory(cat);
-    setPage(1);
+    setPage(1); // Reset to first page on category change
   };
 
   return (
@@ -170,7 +216,6 @@ const Courses = () => {
           </div>
         </div>
       </div>
-      {/* Breadcrumb row removed */}
       {/* Main Content */}
       <div className="content-block">
         <div className="section-area section-sp1">
@@ -190,7 +235,7 @@ const Courses = () => {
                         value={search}
                         onChange={(e) => {
                           setSearch(e.target.value);
-                          setPage(1);
+                          setPage(1); // Reset to first page on search
                         }}
                       />
                     </div>
@@ -216,17 +261,46 @@ const Courses = () => {
                     <img src="assets/images/adv/adv.jpg" alt="" />
                   </a>
                 </div>
-                {/* Recent Courses widget removed */}
+                {/* Recent Courses widget - remains static for now */}
+                <div className="widget recent-posts-entry">
+                  <h5 className="widget-title style-1">Recent Courses</h5>
+                  <div className="widget-post-bx">
+                    {recentCourses.map((course, idx) => (
+                      <div className="widget-post clearfix" key={idx}>
+                        <div className="ttr-post-media">
+                          <img src={course.img} width="200" height="140" alt={course.title} />
+                        </div>
+                        <div className="ttr-post-info">
+                          <h6 className="post-title"><Link to="#">{course.title}</Link></h6>
+                          <ul className="media-post">
+                            <li><Link to="#"><i className="fa fa-user"></i>{course.provider}</Link></li>
+                            <li><Link to="#"><i className="fa fa-money"></i>{course.price}</Link></li>
+                          </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               {/* Course Grid */}
               <div className="col-lg-10 col-md-8 col-sm-12">
                 <div className="row">
-                  {paginatedCourses.length === 0 ? (
-                    <div className="col-12 text-center text-muted">No courses found.</div>
+                  {loading ? (
+                    <div className="col-12 text-center text-muted">Loading courses...</div>
+                  ) : error ? (
+                    <div className="col-12 text-center text-danger">{error}</div>
+                  ) : paginatedCourses.length === 0 ? (
+                    <div className="col-12 text-center text-muted">No courses found matching your criteria.</div>
                   ) : (
-                    paginatedCourses.map((course, idx) => (
-                      <div className="col-md-6 col-lg-4 col-sm-6 m-b30" key={idx}>
-                        <div className="cours-bx d-flex flex-column h-100" style={{ minHeight: 350, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    paginatedCourses.map((course) => (
+                      <div className="col-md-6 col-lg-4 col-sm-6 m-b30" key={course._id}> {/* Use _id for key */}
+                        <div className="cours-bx d-flex flex-column h-100" style={{
+                          minHeight: 350,
+                          background: '#ffe6b3',
+                          borderRadius: 12,
+                          boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+                          overflow: 'hidden' // Ensure border-radius clips image
+                        }}>
                           <div>
                             <div style={{ position: "relative" }}>
                               <img
@@ -246,17 +320,29 @@ const Courses = () => {
                                 </span>
                               )}
                             </div>
-                            <div className="card-body">
-                              <h5 className="card-title" style={{ fontWeight: 500, fontSize: 18 }}>{course.title}</h5>
+                            <div className="card-body" style={{ padding: '16px', flexGrow: 1 }}>
+                              <h5 className="card-title" style={{ fontWeight: 500, fontSize: 18, minHeight: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Link to={`/course-details/${course._id}`}>{course.title}</Link> {/* Use _id for Link */}
+                              </h5>
                               <div style={{ color: "#888", fontSize: 15 }}>{course.provider}</div>
+                              {course.rating && ( // Display rating if available
+                                <div className="rating-bx" style={{ marginTop: 8 }}>
+                                  <ul className="media-post" style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                      <li key={i}><i className={`fa fa-star${i < course.rating ? '' : '-o'}`} style={{ color: '#f3b632', marginRight: 2 }}></i></li>
+                                    ))}
+                                    <li style={{ marginLeft: 5, fontSize: 14, color: '#555' }}>({course.ratingsCount})</li>
+                                  </ul>
+                                </div>
+                              )}
                               <div style={{ fontWeight: 600, fontSize: 18, marginTop: 8 }}>
                                 {course.oldPrice && <span style={{ textDecoration: "line-through", color: "#888", marginRight: 8 }}>{course.oldPrice}</span>}
                                 {course.price}
                               </div>
                             </div>
                           </div>
-                          <div style={{ marginTop: "auto", padding: 16 }}>
-                            <Link to={`/course-details/${(page - 1) * COURSES_PER_PAGE + idx}`} className="btn btn-primary w-100" style={{ borderRadius: 8 }}>
+                          <div style={{ marginTop: "auto", padding: '0 16px 16px 16px' }}>
+                            <Link to={`/course-details/${course._id}`} className="btn btn-primary w-100" style={{ borderRadius: 8 }}>
                               Read More
                             </Link>
                           </div>
@@ -299,4 +385,4 @@ const Courses = () => {
   );
 };
 
-export default Courses; 
+export default Courses;
